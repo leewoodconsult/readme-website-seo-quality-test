@@ -2,7 +2,7 @@
 
 **A working web tool that audits a website for search and AI readiness. I built it as a portfolio project to show how I scope, implement, test and explain technical work.**
 
-> **[Try the live demo →](LIVE_DEMO_URL)** &nbsp;·&nbsp; Built by Daniel Leewood &nbsp;·&nbsp; [LinkedIn](LINKEDIN_URL)
+> **[Try the live demo →](https://leewood-consult-website-seo-quality-test.onrender.com/)** &nbsp;·&nbsp; Built by Daniel Leewood &nbsp;·&nbsp; [LinkedIn](https://www.linkedin.com/in/daniel-leewood/)
 >
 > *The demo runs on a free hosting tier. If it hasn't been used for a while, the first load can take 30–60 seconds to wake up.*
 
@@ -14,10 +14,10 @@
 
 | What I wanted to demonstrate | How it shows up here |
 |---|---|
+| **Technical SEO and AI search knowledge** | Structured data, crawling and indexing, speed, and whether AI crawlers can reach a site, plus signals drawn from Google's spam policies (cloaking, hidden text, unnatural repetition). |
 | **Turning a vague question into a defined process** | "Is this site ready for search and AI answers?" became 70+ explicit rules in four categories. Every rule explains what was found, why it matters, how to fix it and how strong the evidence is. |
 | **Thinking through edge cases before they happen** | I specified what happens when things go wrong: a site that refuses the scanner gets an explanation instead of a score, failed scans don't use up a visitor's allowance, a redirect stops and asks before scanning, and a partly failed scan says which steps failed. |
 | **Quality assurance** | 80 automated tests run against purpose-built "good" and "bad" test sites. After that I scanned real websites, found false alarms, traced each to its cause and fixed the approach, not only the symptom. |
-| **Technical SEO and AI search knowledge** | Structured data, crawling and indexing, speed, and whether AI crawlers can reach a site, plus signals drawn from Google's spam policies (cloaking, hidden text, unnatural repetition). |
 | **Plain-language communication** | Findings are written for a business owner, not an engineer. The report states what it can't see rather than overclaiming. |
 | **Working effectively with AI tools** | I designed and directed the product and built it with Claude as an AI pair-programmer. I set the scope, the rules and the acceptance criteria, reviewed the results, and kept the scoring itself free of AI so it stays explainable. |
 
@@ -120,11 +120,13 @@ flowchart LR
 
 ## About me
 
-I'm Daniel Leewood, with 7+ years across operations and implementation roles, based in Los Angeles. This project is how I like to work: define the problem tightly, make trade-offs explicit, test against reality, and explain the result plainly. [ONE_LINE_ABOUT_THE_ROLE_YOU_WANT]
+I'm Daniel Leewood, an SEO and growth marketing professional based in Los Angeles with 7+ years across local search, directory operations, and implementation. I have hands-on experience with Local SEO and custom JSON-LD schema, helping businesses get found and grow on search engines.
+
+This project is how I like to work: define the problem tightly, make trade-offs explicit, test against reality, and explain the result plainly. I'm looking for SEO Specialist roles.
 
 **The source code is private.** I'm glad to walk through it on a call or share access as part of a hiring process.
 
-[LinkedIn](LINKEDIN_URL)
+[LinkedIn](https://www.linkedin.com/in/daniel-leewood/)
 
 ---
 
