@@ -1,131 +1,64 @@
-# SEO & AI-Readiness Scanner
+# SEO & AEO QA Scanner
 
-**A working web tool that audits a website for search and AI readiness. I built it as a portfolio project to show how I scope, implement, test and explain technical work.**
+Enter a live URL and get a plain-English report on four things:
 
-> **[Try the live demo →](LIVE_DEMO_URL)** &nbsp;·&nbsp; Built by Daniel Leewood &nbsp;·&nbsp; [LinkedIn](LINKEDIN_URL)
->
-> *The demo runs on a free hosting tier. If it hasn't been used for a while, the first load can take 30–60 seconds to wake up.*
+1. **Structured data**: is the JSON-LD valid, typed, linked together and consistent with the sitemap?
+2. **Crawl and indexing basics**: robots.txt, sitemap, status codes, titles, descriptions, canonicals, redirects, broken links, soft 404s. Also checks drawn from Google's spam policies: hidden text and links (white-on-white, off-screen, zero-size, a link hidden on one punctuation mark, found from the page's own markup), a cloaking comparison (is the home page the same for a browser, Googlebot, a phone and a visitor arriving from Google?) and informational repetition signals (heavily repeated phrases, long lists of place phrases, phone-number lists, near-copy pages, keyword-string titles).
+3. **Speed**: server response time, compression, page and image weight, render-blocking scripts, image dimensions and caching. These are measured from the scanner's server in one location, without a browser, so they point to likely causes and don't replace real-visitor data (Search Console's Core Web Vitals, PageSpeed Insights). The caching check scores only files served from the site's own domain; when everything comes from a CDN it reports "Not measured" instead of a pass.
+4. **AI readiness (AEO/GEO)**: can AI tools reach and read the site? It checks that Google, Bing and AI search crawlers are allowed in robots.txt, that a firewall isn't refusing AI crawlers, that snippets aren't blocked, and (unscored) that the text is in the raw HTML and the business is clearly described. It does not predict whether AI tools will cite you.
 
-![A scored report for the demo site, with four category scores](screenshots/03-report.png)
+Every finding says what was found, why it matters, how to fix it, and, where the evidence is thin, an **evidence note**. For example, no AI provider has confirmed that it reads `llms.txt`, so that check is informational and never scored.
 
----
+The rules come from a personal website-build playbook covering structured data, crawlability and AI-search access, turned into automated checks.
 
-## What this project shows
+## Run it
 
-| What I wanted to demonstrate | How it shows up here |
-|---|---|
-| **Turning a vague question into a defined process** | "Is this site ready for search and AI answers?" became 70+ explicit rules in four categories. Every rule explains what was found, why it matters, how to fix it and how strong the evidence is. |
-| **Thinking through edge cases before they happen** | I specified what happens when things go wrong: a site that refuses the scanner gets an explanation instead of a score, failed scans don't use up a visitor's allowance, a redirect stops and asks before scanning, and a partly failed scan says which steps failed. |
-| **Quality assurance** | 93 automated tests run against purpose-built "good" and "bad" test sites. After that I scanned real websites, found false alarms, traced each to its cause and fixed the approach, not only the symptom. |
-| **Technical SEO and AI search knowledge** | Structured data, crawling and indexing, speed, and whether AI crawlers can reach a site, plus signals drawn from Google's spam policies (cloaking, hidden text, unnatural repetition). |
-| **Plain-language communication** | Findings are written for a business owner, not an engineer. The report states what it can't see rather than overclaiming. |
-| **Working effectively with AI tools** | I designed and directed the product and built it with Claude as an AI pair-programmer. I set the scope, the rules and the acceptance criteria, reviewed the results, and kept the scoring itself free of AI so it stays explainable. |
+```bash
+pip install -r requirements.txt
+python app.py            # http://localhost:5000
+python -m unittest discover -s tests -v
+```
 
----
+## Deploy
 
-## Why I built it
+`render.yaml` and the `Dockerfile` deploy to Render (free plan) or any container host. Run **one** worker: scan jobs are held in memory.
 
-I'm often asked some version of "is our website set up so Google, and now ChatGPT and Claude, can find and understand it?" I wanted a free tool that answers that by checking a site against Google's published guidance and whether AI crawlers are allowed in robots.txt.
+| Variable | Default | Meaning |
+|---|---|---|
+| `QA_RATE_LIMIT` | 5 | scans per visitor per hour |
+| `QA_DAILY_LIMIT` | 20 | scans per visitor per day |
+| `QA_DOMAIN_LIMIT` | 3 | scans of one site per hour, from any visitor |
+| `QA_GLOBAL_DAILY` | 300 | scans per day for the whole server |
+| `QA_MAX_RUNNING` | 4 | simultaneous scans |
+| `QA_CACHE_SECONDS` | 600 | a finished report for the same page is reused, not rescanned |
+| `QA_PROXY_HOPS` | 1 | trusted proxies in front of the app (0 when none); controls which `X-Forwarded-For` entry is believed |
+| `QA_ALLOW_PRIVATE` | unset | **tests only**: allows scanning localhost |
 
-It also reflects how I approach SEO work: first identify and resolve the technical gaps directly within my control (the website), then optimize the external directories where the business is listed.
+Limits are held in memory and reset when the server restarts.
 
----
+### How AI readiness is scored
 
-## What it does
+Each AI readiness check carries an evidence label. **Documented** (a vendor says so in its own guidance) and **Tested** (the scanner observed it) count toward the score. **Best practice** and **Info** items are shown but never scored, because nobody publishes how answer engines choose what to cite.
 
-Enter a web address. In under a minute the tool reads the site's public files and a sample of its pages, runs **70+ checks**, and returns a scored report in four categories:
+The firewall test requests the home page once per AI crawler, sending that crawler's published User-Agent string, and compares the result with a normal visit. It cannot use the crawlers' verified IP addresses, so a refusal means "may be blocked".
 
-| Category | What it looks at |
-|---|---|
-| **Structured data** | Whether the site's schema.org markup is valid, correctly typed, linked together, and consistent with its sitemap |
-| **Crawl and indexing** | robots.txt, sitemap, status codes, redirects, titles, descriptions, canonicals, broken links, plus spam-policy signals: hidden text, whether crawlers are shown the same page as visitors (cloaking), and unnatural repetition |
-| **Speed** | Server response time, compression, page and image weight, render-blocking scripts, caching |
-| **AI readiness** | Whether AI search crawlers can actually reach and read the site, including a test for firewalls that quietly turn them away |
-
----
-
-## Judgment calls I made
-
-The tool could have been built to produce the biggest, scariest score. I built it to be accurate and fair.
-
-| Decision | Why |
-|---|---|
-| **No AI model in the scoring.** Every rule is deterministic. | The same site gets the same result every time, and every finding can be explained and audited. |
-| **Every AI-readiness check carries an evidence label**: *Documented*, *Tested*, *Best practice* or *Info*. Only the first two affect the score. | Nobody publishes how AI tools choose what to cite. Most "AI SEO" advice is guesswork presented as fact, so the score only counts what a vendor documents or what the tool can observe directly. |
-| **Spam signals are separated by how provable they are.** Cloaking and hidden text are detected from what the scanner can observe, and can affect the score. Keyword repetition is a statistical hint, shown as information and never scored. | Google defines these by intent and publishes no numbers for repetition. A scanner can show what it saw, not what someone meant. |
-| **A site that refuses the scanner gets an explanation, not a score.** | A firewall blocking the scanner says nothing about the site's quality. A made-up "F" would be wrong and unfair. |
-| **Failed scans never count against a visitor's limit.** | Mistyped addresses and down servers shouldn't use up someone's allowance. |
-| **Partial failures are visible.** A step that can't complete turns gray with an ✕, and a banner explains which checks may be incomplete. | A report that silently skips a step is worse than no report. |
-| **Redirects stop and ask.** If an address leads to a different site or page, the tool says so and asks before scanning. | Otherwise the report would describe a site the user didn't mean. Tidy changes (http→https, www) are applied silently. |
-| **The report always says how much it looked at**: for example "Sampled 12 of 15 pages". Pages are spread across sections of the site. | A sample shouldn't pass as a full audit, and 500 blog posts shouldn't crowd out the service pages. |
-| **The limits are stated, not hidden.** Speed is measured from one location. AI checks don't predict citations. When something can't be measured (files served from a CDN, a sitemap larger than the 2,000 URLs read), the report says "not measured" or "2,000+" instead of showing a pass or a false total. | Trust comes from saying what the tool can't see. |
-
----
-
-## How it was built: test, fix, repeat
-
-I treat a real website as the test that counts, so most improvements came from scanning real sites.
-
-- **A false alarm on a valid schema type.** The first real-world scan reported a rare-but-valid type as unrecognized, and a business-profile check only looked at the first entity on a page. I traced both to their causes and replaced the underlying approach with the full schema.org vocabulary and its subtype relationships, instead of a hand-picked list.
-- **A slowdown I introduced.** After I added a new check, a scan of a large page timed out. I found the cause (the new check read each page's styling inefficiently), made it about 30 times faster, added a test so it can't quietly return, and added an overall time limit so one slow step can't cancel the rest.
-- **Wording that overclaimed.** I reviewed the explanations against Google's own documentation and softened or relabeled the ones the documentation didn't fully support.
-
----
-
-## What a finding looks like
-
-Every finding says what was found, why it matters, how to fix it, and which pages are affected. Findings are labeled *Documented*, *Tested*, *Best practice* or *Info*, so a reader can see how much weight each one deserves. While a scan runs, a live progress tracker shows the real stages as they happen.
-
-![A finding with its explanation, fix and affected page](screenshots/05-issues.png)
-
-*Screenshots are scans of Acme Normandy Tours, a fictional demo site I built with deliberate flaws, so each kind of finding appears. You can scan it yourself: [acme-demo-seo-test.netlify.app](https://acme-demo-seo-test.netlify.app/).*
-
----
+The cloaking comparison requests the home page as a desktop browser (twice, to measure how much the page changes by itself), Googlebot, Googlebot smartphone, a phone, and a browser arriving from google.com, then compares the final address, title, headings, noindex, canonical and text similarity. A page that changes on its own is downgraded to information, and a refused request is reported as refused, never as cloaking. A clean result only means no difference was found for those requests. The hidden-text check reads inline styles and `<style>` rules only (no browser), and skips accordions, tabs, screen-reader text and animated reveals, which Google says are fine. The repetition signals are plain statistics. Google publishes no thresholds, so they are information only and never scored.
 
 ## How it works
 
-```mermaid
-flowchart LR
-  A[Visitor enters address] --> B{Safety and redirect check}
-  B -->|Redirects| C[Ask the visitor to confirm]
-  B -->|Fine| D[Collect a snapshot:<br/>robots.txt, sitemap, sample of pages,<br/>assets, crawler comparisons]
-  C --> D
-  D --> E[Run deterministic checks<br/>in four categories]
-  E --> F[Score using evidence labels]
-  F --> G[Report: findings, fixes,<br/>Markdown / JSON export]
-```
+`fetch.py` is the security boundary: http/https only, standard ports, public IPs only (re-checked on every redirect), 2 MB body cap, timeouts. `crawl.py` collects a small snapshot (home page, robots.txt, up to 4 sitemaps (the first 2,000 URLs of each are read, and the report says "2,000+" when that limit is reached), up to 12 pages, 20 link checks, 40 s for the page sample and 70 s overall). `checks_*.py` are deterministic rules, with no AI model in the loop, and `report.py` scores them (error = 3, warning = 2, info = 0) per category.
 
-- **Python / Flask** back end, **plain HTML, CSS and JavaScript** front end (no framework needed)
-- **Safety by design:** the scanner only fetches public web addresses, re-checks every redirect, caps page sizes and scan time, and rate-limits per visitor and per target site so it can't be used to hammer anyone
-- **Schema validation** uses the full, current schema.org type hierarchy bundled with the app
-- **93 automated tests**, run against purpose-built "good" and "bad" test sites, including the failure paths above
-- Containerised and deployed on a free hosting tier
+## Honest limits
 
----
+- Reads at most about 12 pages, so a score describes a sample.
+- Schema **types** are checked against the full schema.org type list (bundled in `qa/data/schema_types.json`, currently v30.1, refreshed with `scripts/build_schema_data.py`). Schema **properties** are not checked, so confirm with the Schema Markup Validator and Google's Rich Results Test.
+- It cannot see rendered (JavaScript) output or real rankings, and it is not a substitute for Search Console.
+- Answer engines don't publish how they cite pages. Items marked as best practice are exactly that.
 
-## What it deliberately doesn't do
+## Roadmap
 
-- It checks a **sample** of pages, not an entire site
-- It doesn't render JavaScript, so it can't measure real-browser metrics such as Core Web Vitals
-- It doesn't predict rankings or AI citations, and says so on the report
-- It validates schema.org **types**, not every property. Google's Rich Results Test and the Schema Markup Validator remain the final word
+Share-preview checks (og:image size and weight), full schema.org vocabulary, optional Claude-written explanations, saved report history.
 
-## What I'd build next
+## Credits
 
-- Social share-preview checks (image size, weight, and tags)
-- Saved reports and before/after comparisons for ongoing monitoring
-- Optional plain-language summaries written by an AI model, kept clearly separate from the deterministic score
-
----
-
-## About me
-
-I'm Daniel Leewood, with 7+ years across operations and implementation roles, based in Los Angeles. This project is how I like to work: define the problem tightly, make trade-offs explicit, test against reality, and explain the result plainly. [ONE_LINE_ABOUT_THE_ROLE_YOU_WANT]
-
-**The source code is private.** I'm glad to walk through it on a call or share access as part of a hiring process.
-
-[LinkedIn](LINKEDIN_URL)
-
----
-
-*Schema type data derived from [schema.org](https://schema.org), used under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).*
+The schema.org type list in `qa/data/schema_types.json` is derived from the [schema.org](https://schema.org) vocabulary (version recorded in the file), which is available under the [Creative Commons Attribution-ShareAlike 3.0 license](https://creativecommons.org/licenses/by-sa/3.0/). The crawler User-Agent strings used by the firewall test imitate the formats published by OpenAI, Anthropic and Perplexity, for testing only.
