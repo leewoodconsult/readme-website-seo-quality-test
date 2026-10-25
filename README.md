@@ -16,7 +16,7 @@
 |---|---|
 | **Turning a vague question into a defined process** | "Is this site ready for search and AI answers?" became 70+ explicit rules in four categories. Every rule explains what was found, why it matters, how to fix it and how strong the evidence is. |
 | **Thinking through edge cases before they happen** | I specified what happens when things go wrong: a site that refuses the scanner gets an explanation instead of a score, failed scans don't use up a visitor's allowance, a redirect stops and asks before scanning, and a partly failed scan says which steps failed. |
-| **Quality assurance** | 87 automated tests run against purpose-built "good" and "bad" test sites. After that I scanned real websites, found false alarms, traced each to its cause and fixed the approach, not only the symptom. |
+| **Quality assurance** | 93 automated tests run against purpose-built "good" and "bad" test sites. After that I scanned real websites, found false alarms, traced each to its cause and fixed the approach, not only the symptom. |
 | **Technical SEO and AI search knowledge** | Structured data, crawling and indexing, speed, and whether AI crawlers can reach a site, plus signals drawn from Google's spam policies (cloaking, hidden text, unnatural repetition). |
 | **Plain-language communication** | Findings are written for a business owner, not an engineer. The report states what it can't see rather than overclaiming. |
 | **Working effectively with AI tools** | I designed and directed the product and built it with Claude as an AI pair-programmer. I set the scope, the rules and the acceptance criteria, reviewed the results, and kept the scoring itself free of AI so it stays explainable. |
@@ -55,10 +55,10 @@ The tool could have been built to produce the biggest, scariest score. I built i
 | **Spam signals are separated by how provable they are.** Cloaking and hidden text are detected from what the scanner can observe, and can affect the score. Keyword repetition is a statistical hint, shown as information and never scored. | Google defines these by intent and publishes no numbers for repetition. A scanner can show what it saw, not what someone meant. |
 | **A site that refuses the scanner gets an explanation, not a score.** | A firewall blocking the scanner says nothing about the site's quality. A made-up "F" would be wrong and unfair. |
 | **Failed scans never count against a visitor's limit.** | Mistyped addresses and down servers shouldn't use up someone's allowance. |
-| **Partial failures are visible.** A step that can't complete turns red with an ✕, and a banner explains which checks may be incomplete. | A report that silently skips a step is worse than no report. |
+| **Partial failures are visible.** A step that can't complete turns gray with an ✕, and a banner explains which checks may be incomplete. | A report that silently skips a step is worse than no report. |
 | **Redirects stop and ask.** If an address leads to a different site or page, the tool says so and asks before scanning. | Otherwise the report would describe a site the user didn't mean. Tidy changes (http→https, www) are applied silently. |
 | **The report always says how much it looked at**: for example "Sampled 12 of 15 pages". Pages are spread across sections of the site. | A sample shouldn't pass as a full audit, and 500 blog posts shouldn't crowd out the service pages. |
-| **The limits are stated, not hidden.** Speed is measured from one location. AI checks don't predict citations. | Trust comes from saying what the tool can't see. |
+| **The limits are stated, not hidden.** Speed is measured from one location. AI checks don't predict citations. When something can't be measured (files served from a CDN, a sitemap larger than the 2,000 URLs read), the report says "not measured" or "2,000+" instead of showing a pass or a false total. | Trust comes from saying what the tool can't see. |
 
 ---
 
@@ -98,7 +98,7 @@ flowchart LR
 - **Python / Flask** back end, **plain HTML, CSS and JavaScript** front end (no framework needed)
 - **Safety by design:** the scanner only fetches public web addresses, re-checks every redirect, caps page sizes and scan time, and rate-limits per visitor and per target site so it can't be used to hammer anyone
 - **Schema validation** uses the full, current schema.org type hierarchy bundled with the app
-- **87 automated tests**, run against purpose-built "good" and "bad" test sites, including the failure paths above
+- **93 automated tests**, run against purpose-built "good" and "bad" test sites, including the failure paths above
 - Containerised and deployed on a free hosting tier
 
 ---
