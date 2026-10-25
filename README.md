@@ -120,7 +120,7 @@ flowchart LR
 
 ## About me
 
-I'm Daniel Leewood, with 7+ years across operations and implementation roles, based in Los Angeles. This project is how I like to work: define the problem tightly, make trade-offs explicit, test against reality, and explain the result plainly. [ONE_LINE_ABOUT_THE_ROLE_YOU_WANT]
+I'm Daniel Leewood, with 7+ years across operations and implementation roles, based in Los Angeles. This project is how I like to work: define the problem tightly, make trade-offs explicit, test against reality, and explain the result plainly.
 
 **The source code is private.** I'm glad to walk through it on a call or share access as part of a hiring process.
 
