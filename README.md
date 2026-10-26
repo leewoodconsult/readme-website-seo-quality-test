@@ -6,7 +6,7 @@
 >
 > *The demo runs on a free hosting tier. If it hasn't been used for a while, the first load can take 30–60 seconds to wake up.*
 
-![A scored report for the demo site, with four category scores](screenshots/03-report.png)
+![A scored report for the demo site, with category scores](screenshots/03-report.png)
 
 ---
 
@@ -14,9 +14,9 @@
 
 | What I wanted to demonstrate | How it shows up here |
 |---|---|
-| **Turning a vague question into a defined process** | "Is this site ready for search and AI answers?" became 70+ explicit rules in four categories. Every rule explains what was found, why it matters, how to fix it and how strong the evidence is. |
+| **Turning a vague question into a defined process** | "Is this site ready for search and AI answers?" became 80+ explicit rules in five categories. Every rule explains what was found, why it matters, how to fix it and how strong the evidence is. |
 | **Thinking through edge cases before they happen** | I specified what happens when things go wrong: a site that refuses the scanner gets an explanation instead of a score, failed scans don't use up a visitor's allowance, a redirect stops and asks before scanning, and a partly failed scan says which steps failed. |
-| **Quality assurance** | 93 automated tests run against purpose-built "good" and "bad" test sites. After that I scanned real websites, found false alarms, traced each to its cause and fixed the approach, not only the symptom. |
+| **Quality assurance** | 128 automated tests run against purpose-built "good" and "bad" test sites. After that I scanned real websites, found false alarms, traced each to its cause and fixed the approach, not only the symptom. |
 | **Technical SEO and AI search knowledge** | Structured data, crawling and indexing, speed, and whether AI crawlers can reach a site, plus signals drawn from Google's spam policies (cloaking, hidden text, unnatural repetition). |
 | **Plain-language communication** | Findings are written for a business owner, not an engineer. The report states what it can't see rather than overclaiming. |
 | **Working effectively with AI tools** | I designed and directed the product and built it with Claude as an AI pair-programmer. I set the scope, the rules and the acceptance criteria, reviewed the results, and kept the scoring itself free of AI so it stays explainable. |
@@ -33,13 +33,14 @@ It also reflects how I approach SEO work: first identify and resolve the technic
 
 ## What it does
 
-Enter a web address. In under a minute the tool reads the site's public files and a sample of its pages, runs **70+ checks**, and returns a scored report in four categories:
+Enter a web address. In under a minute the tool reads the site's public files and a sample of its pages, runs **80+ checks**, and returns a scored report in five categories:
 
 | Category | What it looks at |
 |---|---|
 | **Structured data** | Whether the site's schema.org markup is valid, correctly typed, linked together, and consistent with its sitemap |
 | **Crawl and indexing** | robots.txt, sitemap, status codes, redirects, titles, descriptions, canonicals, broken links, plus spam-policy signals: hidden text, whether crawlers are shown the same page as visitors (cloaking), and unnatural repetition |
 | **Speed** | Server response time, compression, page and image weight, render-blocking scripts, caching |
+| **Mobile and accessibility** | Whether the page is set up for phones (viewport, zoom, fixed widths, responsive CSS, tiny text) and for screen-reader users (image alt text, form labels, link and button names, frame titles) |
 | **AI readiness** | Whether AI search crawlers can actually reach and read the site, including a test for firewalls that quietly turn them away |
 
 ---
@@ -90,7 +91,7 @@ flowchart LR
   B -->|Redirects| C[Ask the visitor to confirm]
   B -->|Fine| D[Collect a snapshot:<br/>robots.txt, sitemap, sample of pages,<br/>assets, crawler comparisons]
   C --> D
-  D --> E[Run deterministic checks<br/>in four categories]
+  D --> E[Run deterministic checks<br/>in five categories]
   E --> F[Score using evidence labels]
   F --> G[Report: findings, fixes,<br/>Markdown / JSON export]
 ```
@@ -98,7 +99,7 @@ flowchart LR
 - **Python / Flask** back end, **plain HTML, CSS and JavaScript** front end (no framework needed)
 - **Safety by design:** the scanner only fetches public web addresses, re-checks every redirect, caps page sizes and scan time, and rate-limits per visitor and per target site so it can't be used to hammer anyone
 - **Schema validation** uses the full, current schema.org type hierarchy bundled with the app
-- **93 automated tests**, run against purpose-built "good" and "bad" test sites, including the failure paths above
+- **128 automated tests**, run against purpose-built "good" and "bad" test sites, including the failure paths above
 - Containerised and deployed on a free hosting tier
 
 ---
@@ -106,8 +107,8 @@ flowchart LR
 ## What it deliberately doesn't do
 
 - It checks a **sample** of pages, not an entire site
-- It doesn't render JavaScript, so it can't measure real-browser metrics such as Core Web Vitals
-- It doesn't predict rankings or AI citations, and says so on the report
+- It doesn't render JavaScript, so it can't measure real-browser metrics such as Core Web Vitals. This was a deliberate choice: many AI crawlers and other bots don't run JavaScript either, so the raw HTML is what they actually see. Rendering would also need a larger host, strain the scan's time limits, widen the security surface (running a stranger's scripts) and make results less repeatable
+- It reads each page's code, so it can't see how a layout looks on a phone, how large the tap targets are, whether text has enough color contrast, or whether the site works by keyboard. The mobile and accessibility checks flag what the code shows, and the report lists those limits
 - It validates schema.org **types**, not every property. Google's Rich Results Test and the Schema Markup Validator remain the final word
 
 ## What I'd build next
